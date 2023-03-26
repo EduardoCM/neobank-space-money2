@@ -8,6 +8,8 @@ import javax.ws.rs.core.Response.Status;
 
 import org.jboss.logging.Logger;
 
+import com.neobank.spacemoney.model.AccountResponse;
+import com.neobank.spacemoney.model.Account;
 import com.neobank.spacemoney.model.Client;
 
 @Path("/api/client")
@@ -19,15 +21,15 @@ public class ClientAPI {
 	@POST
 	public Response createClient(Client client) {
 
-		client.isBlacklisted = checkBlackListed(client.rfc);
+		AccountResponse accountResponse = new AccountResponse();
 
-		client.isLegalAge = client.age > 18;
-		client.isAuthorizedCountry = client.cellPhoneCountryCode.startsWith("+52");
-		client.isCandidate = client.isLegalAge ^ client.isBlacklisted;
+		accountResponse.isBlacklisted = checkBlackListed(client.rfc);
 
-		log.info("New client: " + client);
+		accountResponse.isLegalAge = client.age > 18;
+		accountResponse.isAuthorizedCountry = client.cellPhoneCountryCode.startsWith("+52");
+		accountResponse.isCandidate = accountResponse.isLegalAge ^ accountResponse.isBlacklisted;
 
-		return Response.status(Status.CREATED).build();
+		return Response.status(Status.CREATED).entity(accountResponse).build();
 
 	}
 
