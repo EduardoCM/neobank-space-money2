@@ -10,8 +10,9 @@ import javax.ws.rs.core.Response.Status;
 
 import org.jboss.logging.Logger;
 
-import com.neobank.spacemoney.model.AccountResponse;
 import com.neobank.spacemoney.model.Client;
+import com.neobank.spacemoney.model.CreateAccountResponse;
+import com.neobank.spacemoney.util.Constants;
 
 @Path("/api/client")
 public class ClientAPI {
@@ -23,22 +24,22 @@ public class ClientAPI {
 	public Response createClient(Client client) {
 		log.info("Client {} " + client);
 		
-		String CODE_MEXICO = "+52", CODE_COLOMBIA = "+57", CODE_PERU = "+51";
-		int LEGAL_AGE = 18;
+		CreateAccountResponse response = new CreateAccountResponse();
 		
-     		AccountResponse response = new AccountResponse();
+		response.isLegalAge = client.age >= Constants.LEGAL_AGE;
+		response.isAuthorizedCountry = (client.cellPhoneCountryCode.startsWith(Constants.CODE_MEXICO) | client.cellPhoneCountryCode.startsWith(Constants.CODE_COLOMBIA) | client.cellPhoneCountryCode.startsWith(Constants.CODE_PERU));
+		response.isBlackListed = checkBlackListed(client.rfc);
 		
-		    response.isLegalAge = client.age >= LEGAL_AGE;
-		    response.isAuthorizedCountry = (client.cellPhoneCountryCode.startsWith(CODE_MEXICO) | client.cellPhoneCountryCode.startsWith(CODE_COLOMBIA) | client.cellPhoneCountryCode.startsWith(CODE_PERU));
-		    response.isBlackListed = checkBlackListed(client.rfc);   	    
-		    response.isCandidate = (response.isLegalAge & response.isAuthorizedCountry) ^ response.isBlackListed;
-
+		response.isCandidate = (response.isLegalAge & response.isAuthorizedCountry) ^ response.isBlackListed;
+     	
 		return Response.status(Status.CREATED).entity(response).build();
 	}
 
 	private boolean checkBlackListed(String rfc) {
-		List<String> blackListed = List.of("CAME9087", "LAGE8763", "ARM2345");
+		List<String> blackListed = List.of("CAME2342", "LAGE3452", "ARM2342");	
 		return blackListed.contains(rfc);
 	}
+
+
 
 }
